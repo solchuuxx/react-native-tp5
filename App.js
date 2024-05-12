@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 //import { StatusBar } from 'expo-status-bar';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { StyleSheet, Text, View, Button, TouchableOpacity  } from 'react-native';
+import { StyleSheet, Text, View, Button, TouchableOpacity, FlatList  } from 'react-native';
+import { scale, moderateScale, verticalScale } from 'react-native-size-matters';
 
 const Stack = createNativeStackNavigator();
 
@@ -33,7 +34,7 @@ export default function App() {
     <NavigationContainer>
       <Stack.Navigator>
         <Stack.Screen name="Inicio" component={Home} />
-        <Stack.Screen name="Prueba" component={Prueba} />
+        <Stack.Screen name="Api" component={Api} />
         <Stack.Screen name="Detalle" component={Detalle} />
       </Stack.Navigator>
     </NavigationContainer>
@@ -45,7 +46,7 @@ const Home = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
-      <Text>Inicio de la aplicación</Text>
+      <Text style={styles.text}>Inicio de la aplicación</Text>
       <Text>Cambiar color:</Text>
       <TouchableOpacity 
         style={[styles.button, button ? styles.buttonPressed : styles.buttonNotPressed]} 
@@ -53,16 +54,33 @@ const Home = ({ navigation }) => {
       >
         <Text style={styles.buttonText}>Botón de color</Text>
       </TouchableOpacity>
-      <Button title="Ir a Prueba" onPress={() => navigation.navigate('Prueba')} />
+      <Button title="Ir a Api" onPress={() => navigation.navigate('Api')} />
       <Button title="Ir a Detalle" onPress={() => navigation.navigate('Detalle')} />
     </View>
   )
 }
 
-const Prueba = ({ navigation }) => {
+const Api = ({ navigation }) => {
+  const [chiste, setChiste] = useState("");
+  const [cargando, setCargando] = useState(true);
+
+  useEffect(() => {
+    fetch('https://v2.jokeapi.dev/joke/Programming?blacklistFlags=nsfw,racist,explicit&format=txt')
+      .then((response) => response.text())
+      .then((text) => setChiste(text))
+      .catch((error) => console.error(error))
+      .finally(() => setCargando(false));
+  }, []);
+
   return (
     <View style={styles.container}>
-      <Text>Pantalla de prueba de la aplicación</Text>
+      <Text>Pantalla de visualizacion de la Api</Text>
+      <Text style={styles.text}>API sobre chistes de programación</Text>
+      {cargando ? (
+        <Text>Cargando...</Text>
+      ) : (
+        <Text>{chiste}</Text>
+      )}
       <Button title="Volver a Inicio" onPress={() => navigation.navigate('Inicio')} />
     </View>
   )
@@ -83,6 +101,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     alignItems: 'center',
     justifyContent: 'center',
+    marginTop: verticalScale(20),
+    padding: moderateScale(20),
   },
   button: {
     padding: 10,
@@ -97,5 +117,20 @@ const styles = StyleSheet.create({
   buttonText: {
     color: '#fff',
     fontSize: 16,
+  },
+  item: {
+    backgroundColor: '#f9c2ff',
+    padding: moderateScale(10),
+    marginVertical: verticalScale(8),
+    marginHorizontal: scale(16),
+  },
+  title: {
+    fontSize: scale(14),
+  },
+  body: {
+    fontSize: scale(12),
+  },
+  text: {
+    fontSize: scale(14),
   },
 });
